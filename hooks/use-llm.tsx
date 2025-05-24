@@ -15,7 +15,7 @@ export const useLLM = () => {
 
     const apiKey = "";
     const model = new ChatOpenAI({
-      modelName: "gpt-3.5-turbo",
+      modelName: ModelType.GPT3_5,
       openAIApiKey: apiKey,
     });
 

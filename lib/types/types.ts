@@ -2,6 +2,7 @@ import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
 export enum ModelType {
   GPT3 = "gpt-3",
+  GPT3_5 = "gpt-3.5-turbo",
   GPT4 = "gpt-4",
   CLAUDE2 = "claude-2",
   CLAUDE3 = "claude-3",
@@ -48,4 +49,12 @@ export type TChatSession = {
   title?: string;
   id: string;
   createdAt: string;
+};
+
+export type TChatContext = {
+  chatSession: TChatSession[];
+};
+
+export type TChatProvider = {
+  children: React.ReactNode;
 };
