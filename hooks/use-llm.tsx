@@ -1,11 +1,13 @@
+"use client";
+
 import { v4 as uuid } from "uuid";
 import { ChatOpenAI } from "@langchain/openai";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { ModelType, PromptProps } from "@/lib/types/types";
+import { ModelType, PromptProps, TUseLLM } from "@/lib/types/types";
 import { preparePrompt } from "@/lib/helpers/helpers";
 import { useChatSession } from "@/hooks/use-chat-session";
 
-export const useLLM = () => {
+export const useLLM = ({ onStreamStart, onStream, onStreamEnd }: TUseLLM) => {
   const { getSessionById, addMessageToSession } = useChatSession();
 
   const runModel = async (props: PromptProps, sessionId: string) => {
@@ -16,7 +18,7 @@ export const useLLM = () => {
     const apiKey = "";
     const model = new ChatOpenAI({
       modelName: ModelType.GPT3_5,
-      openAIApiKey: apiKey,
+      openAIApiKey: apiKey || process.env.PUBLIC_OPENAI_API_KEY,
     });
 
     const newMessageId = uuid();
@@ -30,8 +32,11 @@ export const useLLM = () => {
 
     let streamedMessage = "";
 
+    onStreamStart();
+
     for await (const chunk of stream) {
       streamedMessage += chunk.content;
+      onStream({ props, sessionId, message: streamedMessage });
     }
 
     const chatMessage = {
@@ -44,7 +49,9 @@ export const useLLM = () => {
       props,
     };
 
-    addMessageToSession(sessionId, chatMessage);
+    addMessageToSession(sessionId, chatMessage).then(() => {
+      onStreamEnd();
+    });
   };
 
   return { runModel };
